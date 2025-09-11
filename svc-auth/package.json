@@ -1,7 +1,7 @@
 {
-  "name": "@sales-ai/svc-auth",
+  "name": "@estatecraft/svc-auth",
   "version": "1.0.0",
-  "description": "Authentication service for Sales AI Platform",
+  "description": "Authentication service for EstateCraft",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@sales-ai/shared": "workspace:*",
+    "@estatecraft/shared": "workspace:*",
     "express": "^4.18.0",
     "jsonwebtoken": "^9.0.0",
     "bcryptjs": "^2.4.3",

@@ -1,10 +1,10 @@
-# Sales AI Platform 🚀
+# EstateCraft 🏗️
 
-**Sales Automation AI Platform for Real-Estate SaaS** - Increase lead-to-close conversion by 37% and reduce manual overhead by 60%.
+**EstateCraft - AI-Powered Real Estate Sales Platform** - Increase lead-to-close conversion by 37% and reduce manual overhead by 60%.
 
 ## 🎯 Project Overview
 
-The Sales AI Platform is a comprehensive, event-driven microservices architecture designed to revolutionize real estate sales operations through AI-powered lead qualification, automated engagement, and intelligent follow-up systems.
+EstateCraft is a comprehensive, event-driven microservices architecture designed to revolutionize real estate sales operations through AI-powered lead qualification, automated engagement, and intelligent follow-up systems.
 
 ## 🏗️ Architecture
 
@@ -42,7 +42,7 @@ The Sales AI Platform is a comprehensive, event-driven microservices architectur
 ### 1. Clone & Install
 ```bash
 git clone <your-repo-url>
-cd sales-ai-platform
+cd estatecraft
 npm install
 ```
 
@@ -101,10 +101,10 @@ npm run docker:down      # Stop Docker services
 Create `.env` files in each service directory:
 ```env
 # Database
-DATABASE_URL=postgresql://user:password@localhost:5432/sales_ai_platform
+DATABASE_URL=postgresql://user:password@localhost:5432/estatecraft
 
 # Message Queue
-RABBITMQ_URL=amqp://user:password@localhost:5672/vhost
+RABBITMQ_URL=amqp://estatecraft_user:estatecraft_password@localhost:5672/estatecraft_vhost
 
 # Cache
 REDIS_URL=redis://localhost:6379
@@ -175,7 +175,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🏆 Acknowledgments
 
-- Built with ❤️ by the Sales AI Platform Team
+- Built with ❤️ by the EstateCraft Team
 - Powered by modern web technologies and AI/ML innovations
 - Designed for real estate professionals worldwide
 
@@ -183,4 +183,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Ready to revolutionize your sales process?** 🚀
 
-Get started with the Sales AI Platform today and watch your conversion rates soar!
+Get started with EstateCraft today and watch your conversion rates soar!

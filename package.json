@@ -1,7 +1,7 @@
 {
-  "name": "sales-ai-platform",
+  "name": "estatecraft",
   "version": "1.0.0",
-  "description": "Sales Automation AI Platform for Real-Estate SaaS - Increase lead-to-close conversion by 37% and reduce manual overhead by 60%",
+  "description": "EstateCraft - AI-Powered Real Estate Sales Platform - Increase lead-to-close conversion by 37% and reduce manual overhead by 60%",
   "private": true,
   "workspaces": [
     "webapp-dashboard",
@@ -64,15 +64,16 @@
     "npm": ">=9.0.0"
   },
   "keywords": [
-    "sales",
+    "estatecraft",
+    "real-estate",
     "ai",
     "automation",
-    "real-estate",
     "saas",
     "lead-qualification",
     "engagement",
-    "followup"
+    "followup",
+    "sales"
   ],
-  "author": "Sales AI Platform Team",
+  "author": "EstateCraft Team",
   "license": "MIT"
 }

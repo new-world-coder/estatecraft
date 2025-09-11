@@ -52,7 +52,7 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    service: 'sales-ai-api',
+    service: 'estatecraft-api',
     version: config.version
   });
 });
@@ -104,7 +104,7 @@ async function startServer() {
   await initializeServices();
   
   server.listen(config.port, () => {
-    logger.info(`Sales AI API Gateway running on port ${config.port}`);
+    logger.info(`EstateCraft API Gateway running on port ${config.port}`);
     logger.info(`Environment: ${config.nodeEnv}`);
     logger.info(`CORS origins: ${config.corsOrigins.join(', ')}`);
   });

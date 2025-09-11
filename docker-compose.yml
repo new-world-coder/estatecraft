@@ -2,18 +2,18 @@ services:
   # Database
   postgres:
     image: postgres:15-alpine
-    container_name: sales-ai-postgres
+    container_name: estatecraft-postgres
     environment:
-      POSTGRES_DB: sales_ai_platform
-      POSTGRES_USER: sales_ai_user
-      POSTGRES_PASSWORD: sales_ai_password
+      POSTGRES_DB: estatecraft
+      POSTGRES_USER: estatecraft_user
+      POSTGRES_PASSWORD: estatecraft_password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infra-migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sales_ai_user -d sales_ai_platform"]
+      test: ["CMD-SHELL", "pg_isready -U estatecraft_user -d estatecraft"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -21,11 +21,11 @@ services:
   # Message Queue
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    container_name: sales-ai-rabbitmq
+    container_name: estatecraft-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: sales_ai_user
-      RABBITMQ_DEFAULT_PASS: sales_ai_password
-      RABBITMQ_DEFAULT_VHOST: sales_ai_vhost
+      RABBITMQ_DEFAULT_USER: estatecraft_user
+      RABBITMQ_DEFAULT_PASS: estatecraft_password
+      RABBITMQ_DEFAULT_VHOST: estatecraft_vhost
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -40,7 +40,7 @@ services:
   # Cache
   redis:
     image: redis:7-alpine
-    container_name: sales-ai-redis
+    container_name: estatecraft-redis
     ports:
       - "6379:6379"
     volumes:
@@ -58,4 +58,4 @@ volumes:
 
 networks:
   default:
-    name: sales-ai-network
+    name: estatecraft-network

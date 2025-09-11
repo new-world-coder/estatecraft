@@ -1,7 +1,7 @@
 {
-  "name": "@sales-ai/svc-closer",
+  "name": "@estatecraft/svc-closer",
   "version": "1.0.0",
-  "description": "svc-closer service for Sales AI Platform",
+  "description": "Deal closing service for EstateCraft",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@sales-ai/shared": "workspace:*",
+    "@estatecraft/shared": "workspace:*",
     "zod": "^3.22.0"
   },
   "devDependencies": {

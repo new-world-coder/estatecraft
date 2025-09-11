@@ -1,7 +1,7 @@
 {
-  "name": "@sales-ai/webapp-dashboard",
+  "name": "@estatecraft/webapp-dashboard",
   "version": "1.0.0",
-  "description": "Frontend dashboard for Sales AI Platform",
+  "description": "Frontend dashboard for EstateCraft",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -17,7 +17,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@sales-ai/shared": "workspace:*",
+    "@estatecraft/shared": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

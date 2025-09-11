@@ -1,7 +1,7 @@
 {
-  "name": "@sales-ai/shared",
+  "name": "@estatecraft/shared",
   "version": "1.0.0",
-  "description": "Shared DTOs, schemas, events, and utilities for Sales AI Platform",
+  "description": "Shared DTOs, schemas, events, and utilities for EstateCraft",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

@@ -1,7 +1,7 @@
 {
-  "name": "@sales-ai/svc-engagement",
+  "name": "@estatecraft/svc-engagement",
   "version": "1.0.0",
-  "description": "svc-engagement service for Sales AI Platform",
+  "description": "Customer engagement service for EstateCraft",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@sales-ai/shared": "workspace:*",
+    "@estatecraft/shared": "workspace:*",
     "zod": "^3.22.0"
   },
   "devDependencies": {

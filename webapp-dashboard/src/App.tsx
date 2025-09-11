@@ -199,7 +199,7 @@ function App() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
         <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            🔐 Login to Sales AI Platform
+            🔐 Login to EstateCraft
           </h2>
           
           <form onSubmit={handleLogin} className="space-y-4">
@@ -212,7 +212,7 @@ function App() {
                 value={loginForm.email}
                 onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="admin@salesai.com"
+                placeholder="admin@estatecraft.com"
                 required
               />
             </div>
@@ -252,7 +252,7 @@ function App() {
           <div className="mt-6 p-4 bg-gray-50 rounded-md">
             <p className="text-sm text-gray-600 text-center">
               <strong>Demo Credentials:</strong><br/>
-              Email: admin@salesai.com<br/>
+              Email: admin@estatecraft.com<br/>
               Password: password
             </p>
           </div>
@@ -268,10 +268,10 @@ function App() {
         <div className="flex justify-between items-center mb-8">
           <div className="text-center flex-1">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              🚀 Sales AI Platform
+              🏗️ EstateCraft
             </h1>
             <p className="text-xl text-gray-600">
-              Welcome to the Sales AI Platform Dashboard
+              Welcome to the EstateCraft Dashboard
             </p>
           </div>
           

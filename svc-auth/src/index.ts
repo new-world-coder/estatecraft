@@ -24,7 +24,7 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    service: 'sales-ai-auth',
+    service: 'estatecraft-auth',
     version: config.version
   });
 });
@@ -46,7 +46,7 @@ app.use('*', (req, res) => {
 
 // Start server
 app.listen(config.port, () => {
-  logger.info(`Sales AI Auth Service running on port ${config.port}`);
+  logger.info(`EstateCraft Auth Service running on port ${config.port}`);
   logger.info(`Environment: ${config.nodeEnv}`);
   logger.info(`CORS origins: ${config.corsOrigins.join(', ')}`);
 });

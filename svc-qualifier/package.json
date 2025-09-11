@@ -1,7 +1,7 @@
 {
-  "name": "@sales-ai/svc-qualifier",
+  "name": "@estatecraft/svc-qualifier",
   "version": "1.0.0",
-  "description": "svc-qualifier service for Sales AI Platform",
+  "description": "Lead qualification service for EstateCraft",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@sales-ai/shared": "workspace:*",
+    "@estatecraft/shared": "workspace:*",
     "zod": "^3.22.0"
   },
   "devDependencies": {

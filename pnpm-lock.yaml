@@ -35,12 +35,12 @@ importers:
 
   infra-migrations:
     dependencies:
+      '@estatecraft/shared':
+        specifier: workspace:*
+        version: link:../lib-shared
       '@prisma/client':
         specifier: ^4.12.0
         version: 4.16.2(prisma@4.16.2)
-      '@sales-ai/shared':
-        specifier: workspace:*
-        version: link:../lib-shared
       dotenv:
         specifier: ^16.0.0
         version: 16.6.1
@@ -99,17 +99,17 @@ importers:
         version: 9.0.8
       jest:
         specifier: ^29.0.0
-        version: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.19.11)(typescript@5.9.2))
+        version: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2))
       ts-jest:
         specifier: ^29.0.0
-        version: 29.4.1(@babel/core@7.28.3)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.28.3))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.19.11)(typescript@5.9.2)))(typescript@5.9.2)
+        version: 29.4.1(@babel/core@7.28.3)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.28.3))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2)))(typescript@5.9.2)
       typescript:
         specifier: ^5.0.0
         version: 5.9.2
 
   svc-analytics:
     dependencies:
-      '@sales-ai/shared':
+      '@estatecraft/shared':
         specifier: workspace:*
         version: link:../lib-shared
       zod:
@@ -128,7 +128,7 @@ importers:
 
   svc-api:
     dependencies:
-      '@sales-ai/shared':
+      '@estatecraft/shared':
         specifier: workspace:*
         version: link:../lib-shared
       amqplib:
@@ -209,13 +209,13 @@ importers:
         version: 2.0.16
       jest:
         specifier: ^29.0.0
-        version: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.19.11)(typescript@5.9.2))
+        version: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2))
       supertest:
         specifier: ^6.3.0
         version: 6.3.4
       ts-jest:
         specifier: ^29.0.0
-        version: 29.4.1(@babel/core@7.28.3)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.28.3))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.19.11)(typescript@5.9.2)))(typescript@5.9.2)
+        version: 29.4.1(@babel/core@7.28.3)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.28.3))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2)))(typescript@5.9.2)
       ts-node-dev:
         specifier: ^2.0.0
         version: 2.0.0(@types/node@20.19.11)(typescript@5.9.2)
@@ -225,7 +225,7 @@ importers:
 
   svc-auth:
     dependencies:
-      '@sales-ai/shared':
+      '@estatecraft/shared':
         specifier: workspace:*
         version: link:../lib-shared
       bcryptjs:
@@ -262,7 +262,7 @@ importers:
 
   svc-closer:
     dependencies:
-      '@sales-ai/shared':
+      '@estatecraft/shared':
         specifier: workspace:*
         version: link:../lib-shared
       zod:
@@ -281,7 +281,7 @@ importers:
 
   svc-engagement:
     dependencies:
-      '@sales-ai/shared':
+      '@estatecraft/shared':
         specifier: workspace:*
         version: link:../lib-shared
       zod:
@@ -300,7 +300,7 @@ importers:
 
   svc-followup:
     dependencies:
-      '@sales-ai/shared':
+      '@estatecraft/shared':
         specifier: workspace:*
         version: link:../lib-shared
       zod:
@@ -319,7 +319,7 @@ importers:
 
   svc-orchestrator:
     dependencies:
-      '@sales-ai/shared':
+      '@estatecraft/shared':
         specifier: workspace:*
         version: link:../lib-shared
       amqplib:
@@ -344,7 +344,7 @@ importers:
 
   svc-qualifier:
     dependencies:
-      '@sales-ai/shared':
+      '@estatecraft/shared':
         specifier: workspace:*
         version: link:../lib-shared
       zod:
@@ -363,7 +363,7 @@ importers:
 
   svc-scheduler:
     dependencies:
-      '@sales-ai/shared':
+      '@estatecraft/shared':
         specifier: workspace:*
         version: link:../lib-shared
       zod:
@@ -382,7 +382,7 @@ importers:
 
   webapp-dashboard:
     dependencies:
-      '@sales-ai/shared':
+      '@estatecraft/shared':
         specifier: workspace:*
         version: link:../lib-shared
       react:
@@ -3831,6 +3831,41 @@ snapshots:
       - supports-color
       - ts-node
 
+  '@jest/core@29.7.0(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2))':
+    dependencies:
+      '@jest/console': 29.7.0
+      '@jest/reporters': 29.7.0
+      '@jest/test-result': 29.7.0
+      '@jest/transform': 29.7.0
+      '@jest/types': 29.6.3
+      '@types/node': 20.19.11
+      ansi-escapes: 4.3.2
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-changed-files: 29.7.0
+      jest-config: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2))
+      jest-haste-map: 29.7.0
+      jest-message-util: 29.7.0
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-resolve-dependencies: 29.7.0
+      jest-runner: 29.7.0
+      jest-runtime: 29.7.0
+      jest-snapshot: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      jest-watcher: 29.7.0
+      micromatch: 4.0.8
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-ansi: 6.0.1
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
   '@jest/environment@29.7.0':
     dependencies:
       '@jest/fake-timers': 29.7.0
@@ -4621,6 +4656,21 @@ snapshots:
       - supports-color
       - ts-node
 
+  create-jest@29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2)):
+    dependencies:
+      '@jest/types': 29.6.3
+      chalk: 4.1.2
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-config: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2))
+      jest-util: 29.7.0
+      prompts: 2.4.2
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
   create-require@1.1.1: {}
 
   cross-spawn@7.0.6:
@@ -5284,6 +5334,25 @@ snapshots:
       - supports-color
       - ts-node
 
+  jest-cli@29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2)):
+    dependencies:
+      '@jest/core': 29.7.0(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2))
+      '@jest/test-result': 29.7.0
+      '@jest/types': 29.6.3
+      chalk: 4.1.2
+      create-jest: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2))
+      exit: 0.1.2
+      import-local: 3.2.0
+      jest-config: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2))
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      yargs: 17.7.2
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
   jest-config@29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.19.11)(typescript@5.9.2)):
     dependencies:
       '@babel/core': 7.28.3
@@ -5311,6 +5380,37 @@ snapshots:
     optionalDependencies:
       '@types/node': 20.19.11
       ts-node: 10.9.2(@types/node@20.19.11)(typescript@5.9.2)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+
+  jest-config@29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2)):
+    dependencies:
+      '@babel/core': 7.28.3
+      '@jest/test-sequencer': 29.7.0
+      '@jest/types': 29.6.3
+      babel-jest: 29.7.0(@babel/core@7.28.3)
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      deepmerge: 4.3.1
+      glob: 7.2.3
+      graceful-fs: 4.2.11
+      jest-circus: 29.7.0
+      jest-environment-node: 29.7.0
+      jest-get-type: 29.6.3
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-runner: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      micromatch: 4.0.8
+      parse-json: 5.2.0
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 20.19.11
+      ts-node: 10.9.2(@types/node@20.5.1)(typescript@5.9.2)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -5536,6 +5636,18 @@ snapshots:
       '@jest/types': 29.6.3
       import-local: 3.2.0
       jest-cli: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.19.11)(typescript@5.9.2))
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
+  jest@29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2)):
+    dependencies:
+      '@jest/core': 29.7.0(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2))
+      '@jest/types': 29.6.3
+      import-local: 3.2.0
+      jest-cli: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2))
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -6382,12 +6494,12 @@ snapshots:
 
   trim-newlines@3.0.1: {}
 
-  ts-jest@29.4.1(@babel/core@7.28.3)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.28.3))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.19.11)(typescript@5.9.2)))(typescript@5.9.2):
+  ts-jest@29.4.1(@babel/core@7.28.3)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.28.3))(jest-util@29.7.0)(jest@29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2)))(typescript@5.9.2):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
       handlebars: 4.7.8
-      jest: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.19.11)(typescript@5.9.2))
+      jest: 29.7.0(@types/node@20.19.11)(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.2))
       json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6
