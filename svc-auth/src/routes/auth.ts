@@ -9,21 +9,29 @@ const router = Router();
   // Mock user database (in production, this would be a real database)
   const mockUsers = [
     {
-      id: '1',
-      email: 'admin@salesai.com',
-      password: '$2a$12$AAc/yZz9X4TQ/9TBgYXnEOdz6H4UnInDFMP5n5BRqfl9b5QnquuHO', // "password"
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'ADMIN'
+      id: 'admin-1',
+      email: 'admin@summitridge.demo',
+      password: '$2a$12$AAc/yZz9X4TQ/9TBgYXnEOdz6H4UnInDFMP5n5BRqfl9b5QnquuHO',
+      firstName: 'Rachel',
+      lastName: 'Summit',
+      role: 'ADMIN',
     },
     {
-      id: '2',
-      email: 'agent@salesai.com',
-      password: '$2a$12$AAc/yZz9X4TQ/9TBgYXnEOdz6H4UnInDFMP5n5BRqfl9b5QnquuHO', // "password"
-      firstName: 'Sales',
-      lastName: 'Agent',
-      role: 'AGENT'
-    }
+      id: 'manager-1',
+      email: 'manager@summitridge.demo',
+      password: '$2a$12$AAc/yZz9X4TQ/9TBgYXnEOdz6H4UnInDFMP5n5BRqfl9b5QnquuHO',
+      firstName: 'Marcus',
+      lastName: 'Ridge',
+      role: 'MANAGER',
+    },
+    {
+      id: 'agent-1',
+      email: 'agent1@summitridge.demo',
+      password: '$2a$12$AAc/yZz9X4TQ/9TBgYXnEOdz6H4UnInDFMP5n5BRqfl9b5QnquuHO',
+      firstName: 'Agent',
+      lastName: 'One',
+      role: 'AGENT',
+    },
   ];
 
 // POST /api/auth/login
