@@ -10,57 +10,177 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
+  password  String?
   firstName String
   lastName  String
   role      UserRole @default(AGENT)
+  phone     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  assignedLeads Lead[]
+
+  assignedLeads  Lead[]
+  listedProperties Property[]
+
   @@map("users")
 }
 
+model Property {
+  id            String         @id @default(cuid())
+  title         String
+  description   String?
+  propertyType  String
+  price         Float
+  currency      String         @default("USD")
+  city          String
+  state         String
+  country       String         @default("USA")
+  zipCode       String?
+  bedrooms      Int?
+  bathrooms     Int?
+  squareFootage Float?
+  features      String[]
+  status        PropertyStatus @default(ACTIVE)
+  listingAgentId String?
+  listingAgent  User?          @relation(fields: [listingAgentId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  leads Lead[]
+
+  @@map("properties")
+}
+
 model Lead {
-  id        String   @id @default(cuid())
-  status    LeadStatus @default(NEW)
+  id        String       @id @default(cuid())
+  status    LeadStatus   @default(NEW)
   source    LeadSource
   priority  LeadPriority @default(MEDIUM)
-  
-  // Contact info
+
   firstName String
   lastName  String
   email     String
   phone     String?
   company   String?
   jobTitle  String?
-  
-  // Property info
-  propertyType String?
-  priceMin     Float?
-  priceMax     Float?
-  currency     String? @default("USD")
-  city         String?
-  state        String?
-  country      String?
-  
-  // Qualification
-  qualificationScore Int     @default(0)
-  aiConfidence      Float   @default(0.0)
-  assignedTo        String?
-  assignedUser      User?   @relation(fields: [assignedTo], references: [id])
-  tags              String[]
-  notes             String[]
-  
-  // Follow-up
+
+  propertyId    String?
+  property      Property? @relation(fields: [propertyId], references: [id])
+  propertyType  String?
+  priceMin      Float?
+  priceMax      Float?
+  currency      String?   @default("USD")
+  city          String?
+  state         String?
+  country       String?
+
+  qualificationScore Int   @default(0)
+  aiConfidence       Float @default(0.0)
+  assignedTo         String?
+  assignedUser       User? @relation(fields: [assignedTo], references: [id])
+  tags               String[]
+  notes              String[]
+
   nextFollowUp DateTime?
   cadence      String?
-  
-  // Metadata
-  metadata    Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  communications    Communication[]
+  scoreHistory      LeadScoreHistory[]
+  scheduledFollowUps ScheduledFollowUp[]
+
   @@map("leads")
+}
+
+model Communication {
+  id          String                 @id @default(cuid())
+  leadId      String
+  lead        Lead                   @relation(fields: [leadId], references: [id])
+  channel     CommunicationChannel
+  direction   CommunicationDirection @default(OUTBOUND)
+  status      CommunicationStatus    @default(PENDING)
+  content     String?
+  provider    String
+  providerRef String?
+  metadata    Json?
+  retryCount  Int                    @default(0)
+  parentId    String?
+  parent      Communication?         @relation("CommunicationFallback", fields: [parentId], references: [id])
+  children    Communication[]        @relation("CommunicationFallback")
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  callRecord CallRecord?
+
+  @@index([leadId])
+  @@index([status])
+  @@index([channel])
+  @@map("communications")
+}
+
+model CallRecord {
+  id              String      @id @default(cuid())
+  communicationId String      @unique
+  communication   Communication @relation(fields: [communicationId], references: [id])
+  externalCallId  String?
+  duration        Int?
+  outcome         CallOutcome?
+  transcript      String?
+  startedAt       DateTime?
+  endedAt         DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("call_records")
+}
+
+model VoiceRule {
+  id                    String  @id @default(cuid())
+  name                  String
+  enabled               Boolean @default(true)
+  minQualificationScore Int     @default(70)
+  maxRetries            Int     @default(3)
+  retryDelayMinutes     Int     @default(30)
+  smsFallbackEnabled    Boolean @default(true)
+  smsFallbackTemplate   String?
+  outboundInstruction   String
+  priority              Int     @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("voice_rules")
+}
+
+model LeadScoreHistory {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id])
+  score     Int
+  factors   Json
+  trigger   String?
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+  @@map("lead_score_history")
+}
+
+model ScheduledFollowUp {
+  id          String          @id @default(cuid())
+  leadId      String
+  lead        Lead            @relation(fields: [leadId], references: [id])
+  scheduledAt DateTime
+  type        String
+  status      FollowUpStatus  @default(PENDING)
+  assignedTo  String?
+  notes       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([leadId])
+  @@index([scheduledAt])
+  @@map("scheduled_follow_ups")
 }
 
 enum UserRole {
@@ -96,4 +216,52 @@ enum LeadPriority {
   MEDIUM
   HIGH
   URGENT
+}
+
+enum PropertyStatus {
+  ACTIVE
+  PENDING
+  SOLD
+  WITHDRAWN
+}
+
+enum CommunicationChannel {
+  VOICE
+  SMS
+  EMAIL
+  WHATSAPP
+}
+
+enum CommunicationDirection {
+  OUTBOUND
+  INBOUND
+}
+
+enum CommunicationStatus {
+  PENDING
+  QUEUED
+  INITIATED
+  RINGING
+  IN_PROGRESS
+  COMPLETED
+  DELIVERED
+  FAILED
+  NO_ANSWER
+  BUSY
+  CANCELLED
+}
+
+enum CallOutcome {
+  CONNECTED
+  NO_ANSWER
+  BUSY
+  FAILED
+  VOICEMAIL
+}
+
+enum FollowUpStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  SKIPPED
 }

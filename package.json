@@ -19,6 +19,7 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:webapp\"",
+    "dev:stack": "SKIP_INFRA=true concurrently \"npm run dev:api\" \"npm run dev:webapp\"",
     "dev:api": "cd svc-api && npm run dev",
     "dev:auth": "cd svc-auth && npm run dev",
     "dev:orchestrator": "cd svc-orchestrator && npm run dev",
@@ -30,6 +31,7 @@
     "dev:scheduler": "cd svc-scheduler && npm run dev",
     "dev:webapp": "cd webapp-dashboard && npm run dev",
     "build": "npm run build:shared && npm run build:services && npm run build:webapp",
+    "build:vercel": "cd infra-migrations && npx prisma generate && cd ../lib-shared && npx tsc && cd ../svc-engagement && npx tsc && cd ../svc-qualifier && npx tsc && cd ../svc-api && npx tsc && cd ../webapp-dashboard && npx tsc && npx vite build",
     "build:shared": "cd lib-shared && npm run build",
     "build:services": "npm run build --workspaces --if-present --prefix=svc-",
     "build:webapp": "cd webapp-dashboard && npm run build",
@@ -62,6 +64,9 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "prisma", "esbuild"]
   },
   "keywords": [
     "estatecraft",

@@ -104,3 +104,4 @@ cypress/screenshots/
 # Misc
 *.tgz
 *.tar.gz
+.vercel

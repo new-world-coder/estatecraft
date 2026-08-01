@@ -1,10 +1,10 @@
-import amqp from 'amqplib';
+import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
 import { config } from '../config';
 import { logger } from '../utils/logger';
 
 class MessageQueueService {
-  private connection: amqp.Connection | null = null;
-  private channel: amqp.Channel | null = null;
+  private connection: Connection | null = null;
+  private channel: Channel | null = null;
 
   async connect(): Promise<void> {
     try {
@@ -65,7 +65,7 @@ class MessageQueueService {
         throw new Error('Message queue not connected');
       }
       
-      await this.channel.consume(queueName, (message) => {
+      await this.channel.consume(queueName, (message: ConsumeMessage | null) => {
         if (message) {
           try {
             const content = JSON.parse(message.content.toString());
