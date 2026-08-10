@@ -127,6 +127,19 @@ estatecraft/
 ├── infra-migrations/       # Prisma schema + seed
 └── docs/
 ```
+## Try it / fork it
+
+EstateCraft is an open platform for AI-assisted real estate outreach:
+lead scoring, outbound voice calls, SMS fallback, and a live dashboard.
+
+**Quick local try**
+1. `cp .env.example .env && pnpm install`
+2. `pnpm run docker:up && pnpm run db:migrate && pnpm run db:seed`
+3. `pnpm run dev` → http://localhost:5173  
+   Demo login: `admin@summitridge.demo` / `password`
+
+Fork the repo, run the Summit Ridge demo data, swap `VOICE_PROVIDER=mock`
+for Dial when you’re ready for live calls. Issues and PRs welcome.
 
 ## License
 
