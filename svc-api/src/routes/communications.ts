@@ -3,12 +3,21 @@ import { AuthRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { getPrisma, createCommunicationStore } from '../services/prisma-store';
 import { getOrchestrator } from '@estatecraft/svc-engagement';
+import { canAccessLead, leadAccessWhere } from '../utils/access';
 
 const router = Router();
 
 router.get('/timeline/:leadId', async (req: AuthRequest, res) => {
   try {
     const db = getPrisma();
+    const lead = await db.lead.findUnique({ where: { id: req.params.leadId } });
+    if (!lead) {
+      return res.status(404).json({ error: 'Not Found', message: 'Lead not found' });
+    }
+    if (!canAccessLead(req, lead)) {
+      return res.status(403).json({ error: 'Forbidden', message: 'You do not have access to this lead' });
+    }
+
     const communications = await db.communication.findMany({
       where: { leadId: req.params.leadId },
       include: { callRecord: true },
@@ -26,9 +35,11 @@ router.get('/', async (req: AuthRequest, res) => {
   try {
     const db = getPrisma();
     const { leadId, channel, status, limit = '50' } = req.query;
+    const scope = leadAccessWhere(req);
 
     const communications = await db.communication.findMany({
       where: {
+        ...(Object.keys(scope).length ? { lead: scope } : {}),
         ...(leadId ? { leadId: String(leadId) } : {}),
         ...(channel ? { channel: String(channel).toUpperCase() as any } : {}),
         ...(status ? { status: String(status).toUpperCase() as any } : {}),
@@ -56,6 +67,10 @@ router.post('/call', async (req: AuthRequest, res) => {
     const lead = await db.lead.findUnique({ where: { id: leadId } });
     if (!lead || !lead.phone) {
       return res.status(400).json({ error: 'Bad Request', message: 'Lead not found or missing phone' });
+    }
+
+    if (!canAccessLead(req, lead)) {
+      return res.status(403).json({ error: 'Forbidden', message: 'You do not have access to this lead' });
     }
 
     const rules = await db.voiceRule.findMany({ where: { enabled: true }, orderBy: { priority: 'desc' } });
@@ -114,6 +129,17 @@ router.post('/call', async (req: AuthRequest, res) => {
 router.get('/call/:communicationId/status', async (req: AuthRequest, res) => {
   try {
     const db = getPrisma();
+    const existing = await db.communication.findUnique({
+      where: { id: req.params.communicationId },
+      include: { lead: { select: { assignedTo: true } } },
+    });
+    if (!existing) {
+      return res.status(404).json({ error: 'Not Found', message: 'Communication not found' });
+    }
+    if (!canAccessLead(req, existing.lead)) {
+      return res.status(403).json({ error: 'Forbidden', message: 'You do not have access to this communication' });
+    }
+
     const store = createCommunicationStore(db);
     const orchestrator = getOrchestrator(store);
     const communication = await orchestrator.pollCallStatus(req.params.communicationId);

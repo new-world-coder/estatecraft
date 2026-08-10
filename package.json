@@ -42,6 +42,7 @@
     "e2e": "npm run e2e --workspaces --if-present",
     "db:reset": "cd infra-migrations && npm run db:reset",
     "db:migrate": "cd infra-migrations && npm run migrate",
+    "db:migrate:dev": "cd infra-migrations && npm run migrate:dev",
     "db:seed": "cd infra-migrations && npm run seed",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",

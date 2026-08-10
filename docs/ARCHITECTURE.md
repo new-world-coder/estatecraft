@@ -111,3 +111,5 @@ Set `VOICE_PROVIDER` environment variable to select provider.
 
 - **Local**: Docker Compose (Postgres, RabbitMQ, Redis) + `npm run dev`
 - **Vercel**: Serverless Express via `api/index.ts`, static dashboard, external Postgres
+- **Migrations**: Versioned Prisma migrations via `npm run db:migrate` (`prisma migrate deploy`)
+- **Auth**: JWT against Prisma `User` table in `svc-api` (`/api/auth`); role-scoped lead access

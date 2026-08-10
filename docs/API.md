@@ -23,7 +23,12 @@ Returns platform health including database connectivity.
 }
 ```
 
-## Auth (svc-auth — port 3001)
+## Auth (svc-api — `/api/auth`)
+
+Database-backed JWT auth against the Prisma `User` table. Roles: `ADMIN`, `MANAGER`, `AGENT`.
+
+- `ADMIN` / `MANAGER`: full lead visibility; can mutate voice rules; can batch-qualify
+- `AGENT`: only leads assigned to them; read-only voice rules
 
 ### `POST /api/auth/login`
 
@@ -41,13 +46,15 @@ Requires Bearer token.
 
 Query: `status`, `priority`, `limit`, `offset`
 
+Agents only receive leads where `assignedTo` matches their user id.
+
 ### `GET /api/leads/:id`
 
-Returns lead with communications, score history, follow-ups.
+Returns lead with communications, score history, follow-ups. Agents cannot access unassigned or other agents' leads (403).
 
 ### `POST /api/leads`
 
-Create a new lead.
+Create a new lead. Agents are auto-assigned as the owner.
 
 ### `POST /api/leads/:id/qualify`
 
@@ -83,9 +90,11 @@ Poll call status from provider and update database.
 
 ### `GET /api/voice-rules`
 
-List all voice rules.
+List all voice rules (any authenticated role).
 
 ### `POST /api/voice-rules`
+
+Requires `ADMIN` or `MANAGER`.
 
 ```json
 {
@@ -102,19 +111,21 @@ List all voice rules.
 
 ### `PUT /api/voice-rules/:id`
 
-Update rule fields.
+Requires `ADMIN` or `MANAGER`. Update rule fields.
 
 ### `DELETE /api/voice-rules/:id`
+
+Requires `ADMIN` or `MANAGER`.
 
 ## Dashboard
 
 ### `GET /api/dashboard/stats`
 
-Voice activity stats: total calls, success rate, SMS fallbacks, recent calls.
+Voice activity stats: total calls, success rate, SMS fallbacks, recent calls. Scoped to assigned leads for `AGENT`.
 
 ### `GET /api/dashboard/leads-summary`
 
-Lead counts and average qualification score.
+Lead counts and average qualification score. Scoped to assigned leads for `AGENT`.
 
 ## Properties
 

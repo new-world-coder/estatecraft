@@ -105,3 +105,4 @@ cypress/screenshots/
 *.tgz
 *.tar.gz
 .vercel
+.pnpm-store/

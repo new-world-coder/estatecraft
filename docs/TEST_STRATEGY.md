@@ -43,7 +43,7 @@ npm run db:seed
 
 ```bash
 cd infra-migrations
-DATABASE_URL="postgresql://..." npx prisma db push
+DATABASE_URL="postgresql://..." npx prisma migrate deploy
 DATABASE_URL="postgresql://..." npm run seed
 ```
 

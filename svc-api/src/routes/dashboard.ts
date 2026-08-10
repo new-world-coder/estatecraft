@@ -2,22 +2,33 @@ import { Router } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { getPrisma } from '../services/prisma-store';
+import { leadAccessWhere } from '../utils/access';
 
 const router = Router();
 
 router.get('/stats', async (req: AuthRequest, res) => {
   try {
     const db = getPrisma();
+    const leadScope = leadAccessWhere(req);
+    const hasLeadScope = Object.keys(leadScope).length > 0;
+
+    const voiceWhere = hasLeadScope
+      ? { channel: 'VOICE' as const, lead: leadScope }
+      : { channel: 'VOICE' as const };
 
     const [totalCalls, completedCalls, failedCalls, smsFallbacks, recentCalls] = await Promise.all([
-      db.communication.count({ where: { channel: 'VOICE' } }),
-      db.communication.count({ where: { channel: 'VOICE', status: 'COMPLETED' } }),
+      db.communication.count({ where: voiceWhere }),
+      db.communication.count({ where: { ...voiceWhere, status: 'COMPLETED' } }),
       db.communication.count({
-        where: { channel: 'VOICE', status: { in: ['FAILED', 'NO_ANSWER', 'BUSY'] } },
+        where: { ...voiceWhere, status: { in: ['FAILED', 'NO_ANSWER', 'BUSY'] } },
       }),
-      db.communication.count({ where: { channel: 'SMS', parentId: { not: null } } }),
+      db.communication.count({
+        where: hasLeadScope
+          ? { channel: 'SMS', parentId: { not: null }, lead: leadScope }
+          : { channel: 'SMS', parentId: { not: null } },
+      }),
       db.communication.findMany({
-        where: { channel: 'VOICE' },
+        where: voiceWhere,
         include: {
           callRecord: true,
           lead: { select: { firstName: true, lastName: true, phone: true } },
@@ -49,11 +60,17 @@ router.get('/stats', async (req: AuthRequest, res) => {
 router.get('/leads-summary', async (req: AuthRequest, res) => {
   try {
     const db = getPrisma();
+    const scope = leadAccessWhere(req);
+
     const [totalLeads, qualifiedLeads, avgScore, followUps] = await Promise.all([
-      db.lead.count(),
-      db.lead.count({ where: { status: 'QUALIFIED' } }),
-      db.lead.aggregate({ _avg: { qualificationScore: true } }),
-      db.scheduledFollowUp.count({ where: { status: 'PENDING' } }),
+      db.lead.count({ where: scope }),
+      db.lead.count({ where: { ...scope, status: 'QUALIFIED' } }),
+      db.lead.aggregate({ where: scope, _avg: { qualificationScore: true } }),
+      db.scheduledFollowUp.count({
+        where: Object.keys(scope).length
+          ? { status: 'PENDING', lead: scope }
+          : { status: 'PENDING' },
+      }),
     ]);
 
     res.json({
