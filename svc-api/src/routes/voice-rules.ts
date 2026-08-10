@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { AuthRequest } from '../middleware/auth';
+import { requireRole } from '../middleware/rbac';
 import { logger } from '../utils/logger';
 import { getPrisma } from '../services/prisma-store';
 
 const router = Router();
 
-router.get('/', async (req: AuthRequest, res) => {
+// All authenticated users can read voice rules
+router.get('/', async (_req: AuthRequest, res) => {
   try {
     const db = getPrisma();
     const rules = await db.voiceRule.findMany({ orderBy: { priority: 'desc' } });
@@ -16,7 +18,8 @@ router.get('/', async (req: AuthRequest, res) => {
   }
 });
 
-router.post('/', async (req: AuthRequest, res) => {
+// Only ADMIN / MANAGER can mutate voice rules
+router.post('/', requireRole('ADMIN', 'MANAGER'), async (req: AuthRequest, res) => {
   try {
     const db = getPrisma();
     const {
@@ -59,7 +62,7 @@ router.post('/', async (req: AuthRequest, res) => {
   }
 });
 
-router.put('/:id', async (req: AuthRequest, res) => {
+router.put('/:id', requireRole('ADMIN', 'MANAGER'), async (req: AuthRequest, res) => {
   try {
     const db = getPrisma();
     const rule = await db.voiceRule.update({
@@ -73,7 +76,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
   }
 });
 
-router.delete('/:id', async (req: AuthRequest, res) => {
+router.delete('/:id', requireRole('ADMIN', 'MANAGER'), async (req: AuthRequest, res) => {
   try {
     const db = getPrisma();
     await db.voiceRule.delete({ where: { id: req.params.id } });

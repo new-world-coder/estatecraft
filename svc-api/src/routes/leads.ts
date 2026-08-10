@@ -2,18 +2,20 @@ import { Router } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { getPrisma } from '../services/prisma-store';
+import { leadAccessWhere, canAccessLead } from '../utils/access';
 
 const router = Router();
 
 router.get('/', async (req: AuthRequest, res) => {
   try {
-    logger.info('Fetching leads', { userId: req.user?.id });
+    logger.info('Fetching leads', { userId: req.user?.id, role: req.user?.role });
     const db = getPrisma();
 
     const { status, priority, limit = '100', offset = '0' } = req.query;
 
     const leads = await db.lead.findMany({
       where: {
+        ...leadAccessWhere(req),
         ...(status ? { status: String(status).toUpperCase() as any } : {}),
         ...(priority ? { priority: String(priority).toUpperCase() as any } : {}),
       },
@@ -59,6 +61,10 @@ router.get('/:id', async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Not Found', message: 'Lead not found' });
     }
 
+    if (!canAccessLead(req, lead)) {
+      return res.status(403).json({ error: 'Forbidden', message: 'You do not have access to this lead' });
+    }
+
     res.json({ success: true, data: lead });
   } catch (error) {
     logger.error('Error fetching lead:', error);
@@ -86,6 +92,7 @@ router.post('/', async (req: AuthRequest, res) => {
       state,
       country,
       propertyId,
+      assignedTo,
     } = req.body;
 
     if (!firstName || !lastName || !email) {
@@ -93,6 +100,13 @@ router.post('/', async (req: AuthRequest, res) => {
         error: 'Bad Request',
         message: 'firstName, lastName, and email are required',
       });
+    }
+
+    // Agents can only assign leads to themselves
+    const role = req.user?.role?.toUpperCase();
+    let assignee = assignedTo as string | undefined;
+    if (role === 'AGENT') {
+      assignee = req.user!.id;
     }
 
     const lead = await db.lead.create({
@@ -112,6 +126,7 @@ router.post('/', async (req: AuthRequest, res) => {
         state,
         country,
         propertyId,
+        assignedTo: assignee,
         status: 'NEW',
       },
     });

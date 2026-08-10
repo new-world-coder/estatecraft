@@ -1,6 +1,12 @@
+import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config();
+
 import { config } from './config';
 import { logger } from './utils/logger';
 import { authRoutes } from './routes/auth';
@@ -20,12 +26,13 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'estatecraft-auth',
-    version: config.version
+    version: config.version,
+    note: 'Deprecated for production — use svc-api /api/auth',
   });
 });
 
@@ -49,4 +56,5 @@ app.listen(config.port, () => {
   logger.info(`EstateCraft Auth Service running on port ${config.port}`);
   logger.info(`Environment: ${config.nodeEnv}`);
   logger.info(`CORS origins: ${config.corsOrigins.join(', ')}`);
+  logger.warn('svc-auth is deprecated for production; prefer svc-api /api/auth');
 });

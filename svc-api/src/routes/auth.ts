@@ -3,35 +3,9 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { config } from '../config';
 import { logger } from '../utils/logger';
+import { getPrisma } from '../services/prisma-store';
 
 const router = Router();
-
-const demoUsers = [
-  {
-    id: 'admin-1',
-    email: 'admin@summitridge.demo',
-    password: '$2a$12$AAc/yZz9X4TQ/9TBgYXnEOdz6H4UnInDFMP5n5BRqfl9b5QnquuHO',
-    firstName: 'Rachel',
-    lastName: 'Summit',
-    role: 'ADMIN',
-  },
-  {
-    id: 'manager-1',
-    email: 'manager@summitridge.demo',
-    password: '$2a$12$AAc/yZz9X4TQ/9TBgYXnEOdz6H4UnInDFMP5n5BRqfl9b5QnquuHO',
-    firstName: 'Marcus',
-    lastName: 'Ridge',
-    role: 'MANAGER',
-  },
-  {
-    id: 'agent-1',
-    email: 'agent1@summitridge.demo',
-    password: '$2a$12$AAc/yZz9X4TQ/9TBgYXnEOdz6H4UnInDFMP5n5BRqfl9b5QnquuHO',
-    firstName: 'Agent',
-    lastName: 'One',
-    role: 'AGENT',
-  },
-];
 
 router.post('/login', async (req, res) => {
   try {
@@ -44,8 +18,10 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    const user = demoUsers.find((u) => u.email === email);
-    if (!user) {
+    const db = getPrisma();
+    const user = await db.user.findUnique({ where: { email: String(email).toLowerCase() } });
+
+    if (!user || !user.password) {
       return res.status(401).json({
         error: 'Unauthorized',
         message: 'Invalid credentials',
@@ -90,7 +66,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/me', (req, res) => {
+router.get('/me', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -109,7 +85,9 @@ router.get('/me', (req, res) => {
         email: string;
         role: string;
       };
-      const user = demoUsers.find((u) => u.id === decoded.id);
+
+      const db = getPrisma();
+      const user = await db.user.findUnique({ where: { id: decoded.id } });
 
       if (!user) {
         return res.status(401).json({

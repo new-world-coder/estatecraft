@@ -6,9 +6,10 @@
   "scripts": {
     "build": "tsc",
     "migrate": "ts-node src/migrate.ts",
+    "migrate:dev": "npx prisma migrate dev",
+    "migrate:status": "npx prisma migrate status",
     "seed": "ts-node src/seed.ts",
-    "db:reset": "ts-node src/reset.ts",
-    "db:status": "ts-node src/status.ts",
+    "db:reset": "npx prisma migrate reset --force",
     "test": "jest",
     "clean": "rm -rf dist"
   },

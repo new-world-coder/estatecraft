@@ -1,29 +1,28 @@
-import { PrismaClient } from '@prisma/client';
+import path from 'path';
 import dotenv from 'dotenv';
 
+// Load root .env then package-local .env
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 dotenv.config();
-
-const prisma = new PrismaClient();
 
 async function main() {
   console.log('Starting database migration...');
-  
+
   try {
-    // Generate Prisma client
-    console.log('Generating Prisma client...');
     const { execSync } = require('child_process');
+
+    console.log('Generating Prisma client...');
     execSync('npx prisma generate', { stdio: 'inherit' });
-    
-    // Push the schema to the database
-    console.log('Pushing schema to database...');
-    execSync('npx prisma db push', { stdio: 'inherit' });
-    
+
+    // Production / CI: apply committed migrations
+    // Local schema iteration: use `npm run migrate:dev` instead
+    console.log('Applying migrations (prisma migrate deploy)...');
+    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+
     console.log('Database migration completed successfully!');
   } catch (error) {
     console.error('Migration failed:', error);
     process.exit(1);
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

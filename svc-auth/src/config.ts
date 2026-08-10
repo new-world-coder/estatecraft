@@ -9,7 +9,7 @@ export const config = {
   ],
   
   // Database
-  databaseUrl: process.env.DATABASE_URL || 'postgresql://sales_ai_user:sales_ai_password@localhost:5432/sales_ai_platform',
+  databaseUrl: process.env.DATABASE_URL || 'postgresql://estatecraft_user:estatecraft_password@localhost:5432/estatecraft',
   
   // JWT
   jwtSecret: process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production',
