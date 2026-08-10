@@ -16,5 +16,9 @@ export const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
   
   // Password hashing
-  bcryptRounds: 12
+  bcryptRounds: 12,
+
+  // Rate limiting (matches svc-api defaults)
+  rateLimitWindowMs: 15 * 60 * 1000,
+  rateLimitMax: 100,
 };

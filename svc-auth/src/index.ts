@@ -2,6 +2,7 @@ import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -20,6 +21,13 @@ app.use(cors({
   origin: config.corsOrigins,
   credentials: true
 }));
+
+const limiter = rateLimit({
+  windowMs: config.rateLimitWindowMs,
+  max: config.rateLimitMax,
+  message: 'Too many requests from this IP, please try again later.',
+});
+app.use('/api/', limiter);
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
