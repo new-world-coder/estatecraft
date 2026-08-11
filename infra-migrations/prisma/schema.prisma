@@ -7,25 +7,115 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── SaaS control plane ───────────────────────────────────────────────────────
+
+model Plan {
+  id          String   @id @default(cuid())
+  code        PlanCode @unique
+  name        String
+  /// Monthly list price in USD; null = custom / contact sales
+  priceMonthlyUsd Int?
+  maxAgents       Int?
+  maxLeads        Int?
+  maxCallsPerMonth Int?
+  /// Feature flags: ssoRequired, ssoEnabled, customDomain, dedicatedDb, apiAccess
+  features    Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenants Tenant[]
+
+  @@map("plans")
+}
+
+model Tenant {
+  id     String       @id @default(cuid())
+  /// Subdomain slug → {slug}.estatecraft.io
+  slug   String       @unique
+  name   String
+  status TenantStatus @default(PROVISIONING)
+  region DataRegion   @default(US)
+
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id])
+
+  /// Branding / locale / timezone
+  settings Json @default("{}")
+
+  /// Bring-your-own Dial (and future providers). Store secrets encrypted in Phase 2.
+  /// Shape: { dial: { apiKey, baseUrl?, fromNumberId? }, twilio?: {...} }
+  integrations Json @default("{}")
+
+  /// SSO (required for Pro / Enterprise at launch)
+  ssoEnabled    Boolean @default(false)
+  ssoRequired   Boolean @default(false)
+  oidcIssuer    String?
+  oidcClientId  String?
+  /// Encrypted at rest in Phase 2; plaintext only for local demo stubs
+  oidcClientSecret String?
+  oidcScopes       String  @default("openid profile email")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships TenantMembership[]
+  users       User[]
+  properties  Property[]
+  leads       Lead[]
+  communications Communication[]
+  callRecords CallRecord[]
+  voiceRules  VoiceRule[]
+  leadScoreHistory LeadScoreHistory[]
+  scheduledFollowUps ScheduledFollowUp[]
+
+  @@index([region])
+  @@index([status])
+  @@map("tenants")
+}
+
+model TenantMembership {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      UserRole @default(AGENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, userId])
+  @@index([userId])
+  @@map("tenant_memberships")
+}
+
 model User {
   id        String   @id @default(cuid())
+  /// Globally unique for SSO identity mapping
   email     String   @unique
   password  String?
   firstName String
   lastName  String
+  /// Legacy default role; authoritative role is TenantMembership.role
   role      UserRole @default(AGENT)
   phone     String?
+  /// Home / primary tenant (required for row-level ownership on agent actions)
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  memberships    TenantMembership[]
   assignedLeads  Lead[]
   listedProperties Property[]
 
+  @@index([tenantId])
   @@map("users")
 }
 
 model Property {
   id            String         @id @default(cuid())
+  tenantId      String
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
   title         String
   description   String?
   propertyType  String
@@ -47,11 +137,14 @@ model Property {
 
   leads Lead[]
 
+  @@index([tenantId])
   @@map("properties")
 }
 
 model Lead {
   id        String       @id @default(cuid())
+  tenantId  String
+  tenant    Tenant       @relation(fields: [tenantId], references: [id])
   status    LeadStatus   @default(NEW)
   source    LeadSource
   priority  LeadPriority @default(MEDIUM)
@@ -91,11 +184,15 @@ model Lead {
   scoreHistory      LeadScoreHistory[]
   scheduledFollowUps ScheduledFollowUp[]
 
+  @@index([tenantId])
+  @@index([tenantId, assignedTo])
   @@map("leads")
 }
 
 model Communication {
   id          String                 @id @default(cuid())
+  tenantId    String
+  tenant      Tenant                 @relation(fields: [tenantId], references: [id])
   leadId      String
   lead        Lead                   @relation(fields: [leadId], references: [id])
   channel     CommunicationChannel
@@ -114,6 +211,7 @@ model Communication {
 
   callRecord CallRecord?
 
+  @@index([tenantId])
   @@index([leadId])
   @@index([status])
   @@index([channel])
@@ -122,6 +220,8 @@ model Communication {
 
 model CallRecord {
   id              String      @id @default(cuid())
+  tenantId        String
+  tenant          Tenant      @relation(fields: [tenantId], references: [id])
   communicationId String      @unique
   communication   Communication @relation(fields: [communicationId], references: [id])
   externalCallId  String?
@@ -133,11 +233,14 @@ model CallRecord {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
+  @@index([tenantId])
   @@map("call_records")
 }
 
 model VoiceRule {
   id                    String  @id @default(cuid())
+  tenantId              String
+  tenant                Tenant  @relation(fields: [tenantId], references: [id])
   name                  String
   enabled               Boolean @default(true)
   minQualificationScore Int     @default(70)
@@ -150,11 +253,14 @@ model VoiceRule {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
+  @@index([tenantId])
   @@map("voice_rules")
 }
 
 model LeadScoreHistory {
   id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
   leadId    String
   lead      Lead     @relation(fields: [leadId], references: [id])
   score     Int
@@ -162,12 +268,15 @@ model LeadScoreHistory {
   trigger   String?
   createdAt DateTime @default(now())
 
+  @@index([tenantId])
   @@index([leadId])
   @@map("lead_score_history")
 }
 
 model ScheduledFollowUp {
   id          String          @id @default(cuid())
+  tenantId    String
+  tenant      Tenant          @relation(fields: [tenantId], references: [id])
   leadId      String
   lead        Lead            @relation(fields: [leadId], references: [id])
   scheduledAt DateTime
@@ -178,9 +287,29 @@ model ScheduledFollowUp {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
+  @@index([tenantId])
   @@index([leadId])
   @@index([scheduledAt])
   @@map("scheduled_follow_ups")
+}
+
+enum PlanCode {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum TenantStatus {
+  PROVISIONING
+  ACTIVE
+  SUSPENDED
+  OFFBOARDING
+}
+
+enum DataRegion {
+  US
+  EU
+  UAE
 }
 
 enum UserRole {

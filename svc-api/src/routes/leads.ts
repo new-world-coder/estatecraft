@@ -3,6 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { getPrisma } from '../services/prisma-store';
 import { leadAccessWhere, canAccessLead } from '../utils/access';
+import { requireTenantContext } from '../tenant/context';
 
 const router = Router();
 
@@ -109,8 +110,11 @@ router.post('/', async (req: AuthRequest, res) => {
       assignee = req.user!.id;
     }
 
+    const { tenantId } = requireTenantContext();
+
     const lead = await db.lead.create({
       data: {
+        tenantId,
         firstName,
         lastName,
         email,

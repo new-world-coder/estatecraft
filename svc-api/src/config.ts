@@ -33,6 +33,18 @@ export const config = {
   skipInfra: env('SKIP_INFRA') === 'true' || env('VERCEL') === '1',
   autoSeed: env('AUTO_SEED') === 'true' || env('NODE_ENV', 'development') === 'development',
 
+  /** Public API URL for OIDC redirect_uri */
+  publicApiUrl: env('PUBLIC_API_URL', 'http://localhost:3000'),
+  /** SaaS apex domain for tenant hostnames */
+  saasBaseDomain: env('SAAS_BASE_DOMAIN', 'estatecraft.io'),
+  /**
+   * Local/dev only: allow password login on SSO-required (Pro/Enterprise) tenants.
+   * Never enable in production.
+   */
+  tenantSsoPasswordBypass: env('TENANT_SSO_PASSWORD_BYPASS') === 'true',
+  /** Ops key for POST /api/tenants provisioning */
+  platformAdminKey: env('PLATFORM_ADMIN_KEY'),
+
   rateLimitWindowMs: 15 * 60 * 1000,
   rateLimitMax: 100,
 };
