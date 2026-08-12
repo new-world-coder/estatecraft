@@ -8,6 +8,7 @@ import { config } from './config';
 import { logger } from './utils/logger';
 import { errorHandler } from './middleware/error-handler';
 import { authMiddleware } from './middleware/auth';
+import { tenantMiddleware } from './middleware/tenant';
 import { leadRoutes } from './routes/leads';
 import { webhookRoutes } from './routes/webhooks';
 import { communicationRoutes } from './routes/communications';
@@ -16,6 +17,7 @@ import { dashboardRoutes } from './routes/dashboard';
 import { qualificationRoutes } from './routes/qualification';
 import { propertyRoutes } from './routes/properties';
 import { authRoutes } from './routes/auth';
+import { tenantRoutes } from './routes/tenants';
 import { getPrisma } from './services/prisma-store';
 
 export function createApp(): Express {
@@ -53,6 +55,7 @@ export function createApp(): Express {
       version: config.version,
       environment: config.nodeEnv,
       voiceProvider: config.voiceProvider,
+      saasDomain: config.saasBaseDomain,
     };
 
     try {
@@ -71,12 +74,13 @@ export function createApp(): Express {
   });
 
   app.use('/api/auth', authRoutes);
-  app.use('/api/leads', authMiddleware, leadRoutes);
-  app.use('/api/leads', authMiddleware, qualificationRoutes);
-  app.use('/api/communications', authMiddleware, communicationRoutes);
-  app.use('/api/voice-rules', authMiddleware, voiceRuleRoutes);
-  app.use('/api/dashboard', authMiddleware, dashboardRoutes);
-  app.use('/api/properties', authMiddleware, propertyRoutes);
+  app.use('/api/tenants', tenantRoutes);
+  app.use('/api/leads', authMiddleware, tenantMiddleware, leadRoutes);
+  app.use('/api/leads', authMiddleware, tenantMiddleware, qualificationRoutes);
+  app.use('/api/communications', authMiddleware, tenantMiddleware, communicationRoutes);
+  app.use('/api/voice-rules', authMiddleware, tenantMiddleware, voiceRuleRoutes);
+  app.use('/api/dashboard', authMiddleware, tenantMiddleware, dashboardRoutes);
+  app.use('/api/properties', authMiddleware, tenantMiddleware, propertyRoutes);
   app.use('/api/webhooks', webhookRoutes);
 
   app.use(errorHandler);

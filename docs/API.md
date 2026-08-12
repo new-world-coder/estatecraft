@@ -25,20 +25,55 @@ Returns platform health including database connectivity.
 
 ## Auth (svc-api — `/api/auth`)
 
-Database-backed JWT auth against the Prisma `User` table. Roles: `ADMIN`, `MANAGER`, `AGENT`.
+Multi-tenant JWT auth. Login requires a workspace `tenantSlug` (or `{slug}.estatecraft.io` / `X-Tenant-Slug`).
 
-- `ADMIN` / `MANAGER`: full lead visibility; can mutate voice rules; can batch-qualify
+Roles: `ADMIN`, `MANAGER`, `AGENT` (scoped to membership within the tenant).
+
+- `ADMIN` / `MANAGER`: full lead visibility in tenant; can mutate voice rules; can batch-qualify
 - `AGENT`: only leads assigned to them; read-only voice rules
+- **Pro / Enterprise**: SSO required (`GET /api/auth/sso/start`)
 
 ### `POST /api/auth/login`
 
 ```json
-{ "email": "admin@summitridge.demo", "password": "password" }
+{
+  "tenantSlug": "summit-ridge",
+  "email": "admin@summitridge.demo",
+  "password": "password"
+}
 ```
+
+### `GET /api/auth/sso/start?tenantSlug=coastal-homes`
+
+Starts OIDC for SSO-required tenants (Pro/Enterprise).
 
 ### `GET /api/auth/me`
 
 Requires Bearer token.
+
+## Tenants
+
+Domain model: `{slug}.estatecraft.io`. Regions: `US` | `EU` | `UAE`. Dial is bring-your-own per tenant.
+
+### `GET /api/tenants/plans`
+
+Public plan catalog (Starter / Pro / Enterprise).
+
+### `GET /api/tenants/by-slug/:slug`
+
+Public tenant branding / SSO flags for login UI.
+
+### `POST /api/tenants`
+
+Provision tenant + owner. Header: `X-Platform-Admin-Key`.
+
+### `GET /api/tenants/current`
+
+Authenticated current workspace profile.
+
+### `PUT /api/tenants/current/integrations/dial`
+
+Admin: store BYO Dial credentials for this tenant.
 
 ## Leads
 

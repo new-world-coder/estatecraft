@@ -3,6 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { logger } from '../utils/logger';
 import { getPrisma } from '../services/prisma-store';
+import { requireTenantContext } from '../tenant/context';
 
 const router = Router();
 
@@ -41,8 +42,11 @@ router.post('/', requireRole('ADMIN', 'MANAGER'), async (req: AuthRequest, res) 
       });
     }
 
+    const { tenantId } = requireTenantContext();
+
     const rule = await db.voiceRule.create({
       data: {
+        tenantId,
         name,
         enabled,
         minQualificationScore,

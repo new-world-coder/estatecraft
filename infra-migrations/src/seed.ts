@@ -43,15 +43,158 @@ function randomPhone(): string {
   return `+1${area}${mid}${end}`;
 }
 
+async function ensurePlans() {
+  const plans = [
+    {
+      id: 'plan_starter',
+      code: 'STARTER' as const,
+      name: 'Starter',
+      priceMonthlyUsd: 79,
+      maxAgents: 10,
+      maxLeads: 5000,
+      maxCallsPerMonth: 500,
+      features: {
+        ssoEnabled: false,
+        ssoRequired: false,
+        customDomain: false,
+        dedicatedDb: false,
+        apiAccess: true,
+        regions: ['US', 'EU', 'UAE'],
+        dialBringYourOwn: true,
+      },
+    },
+    {
+      id: 'plan_pro',
+      code: 'PRO' as const,
+      name: 'Pro',
+      priceMonthlyUsd: 249,
+      maxAgents: 50,
+      maxLeads: 50000,
+      maxCallsPerMonth: 5000,
+      features: {
+        ssoEnabled: true,
+        ssoRequired: true,
+        customDomain: false,
+        dedicatedDb: false,
+        apiAccess: true,
+        regions: ['US', 'EU', 'UAE'],
+        dialBringYourOwn: true,
+      },
+    },
+    {
+      id: 'plan_enterprise',
+      code: 'ENTERPRISE' as const,
+      name: 'Enterprise',
+      priceMonthlyUsd: null,
+      maxAgents: null,
+      maxLeads: null,
+      maxCallsPerMonth: null,
+      features: {
+        ssoEnabled: true,
+        ssoRequired: true,
+        customDomain: true,
+        dedicatedDb: true,
+        apiAccess: true,
+        regions: ['US', 'EU', 'UAE'],
+        dialBringYourOwn: true,
+        sla: true,
+      },
+    },
+  ];
+
+  for (const plan of plans) {
+    await prisma.plan.upsert({
+      where: { code: plan.code },
+      update: {
+        name: plan.name,
+        priceMonthlyUsd: plan.priceMonthlyUsd,
+        maxAgents: plan.maxAgents,
+        maxLeads: plan.maxLeads,
+        maxCallsPerMonth: plan.maxCallsPerMonth,
+        features: plan.features,
+      },
+      create: plan,
+    });
+  }
+}
+
 async function main() {
-  console.log(`Seeding EstateCraft with ${COMPANY} sample data...`);
+  console.log(`Seeding EstateCraft multi-tenant demo...`);
+  console.log(`Domain: *.estatecraft.io | Regions: US, EU, UAE | Dial: BYO`);
+
+  await ensurePlans();
+  const starter = await prisma.plan.findUniqueOrThrow({ where: { code: 'STARTER' } });
+  const pro = await prisma.plan.findUniqueOrThrow({ where: { code: 'PRO' } });
 
   const passwordHash = await bcrypt.hash('password', 12);
 
-  // Admin + manager
+  // ── Tenant 1: Summit Ridge (Starter, US, password auth) ───────────────────
+  const summit = await prisma.tenant.upsert({
+    where: { slug: 'summit-ridge' },
+    update: {
+      name: COMPANY,
+      status: 'ACTIVE',
+      region: 'US',
+      planId: starter.id,
+      ssoRequired: false,
+      ssoEnabled: false,
+      integrations: { dial: { bringYourOwn: true } },
+    },
+    create: {
+      id: 'tenant_summit_ridge_bootstrap',
+      slug: 'summit-ridge',
+      name: COMPANY,
+      status: 'ACTIVE',
+      region: 'US',
+      planId: starter.id,
+      settings: { timezone: 'America/Denver', locale: 'en-US' },
+      integrations: { dial: { bringYourOwn: true } },
+      ssoRequired: false,
+      ssoEnabled: false,
+    },
+  });
+
+  // ── Tenant 2: Coastal Homes (Pro / SME, EU, SSO required) ─────────────────
+  const coastal = await prisma.tenant.upsert({
+    where: { slug: 'coastal-homes' },
+    update: {
+      name: 'Coastal Homes GmbH',
+      status: 'ACTIVE',
+      region: 'EU',
+      planId: pro.id,
+      ssoRequired: true,
+      ssoEnabled: true,
+      integrations: { dial: { bringYourOwn: true } },
+    },
+    create: {
+      slug: 'coastal-homes',
+      name: 'Coastal Homes GmbH',
+      status: 'ACTIVE',
+      region: 'EU',
+      planId: pro.id,
+      settings: { timezone: 'Europe/Berlin', locale: 'en-DE' },
+      integrations: { dial: { bringYourOwn: true } },
+      ssoRequired: true,
+      ssoEnabled: true,
+      oidcIssuer: null,
+      oidcClientId: null,
+    },
+  });
+
+  console.log(`Tenants: ${summit.slug}.estatecraft.io (US/Starter), ${coastal.slug}.estatecraft.io (EU/Pro+SSO)`);
+
+  // Clear summit domain data for idempotent re-seed of demo content
+  await prisma.scheduledFollowUp.deleteMany({ where: { tenantId: summit.id } });
+  await prisma.leadScoreHistory.deleteMany({ where: { tenantId: summit.id } });
+  await prisma.callRecord.deleteMany({ where: { tenantId: summit.id } });
+  await prisma.communication.deleteMany({ where: { tenantId: summit.id } });
+  await prisma.lead.deleteMany({ where: { tenantId: summit.id } });
+  await prisma.voiceRule.deleteMany({ where: { tenantId: summit.id } });
+  await prisma.property.deleteMany({ where: { tenantId: summit.id } });
+
   const admin = await prisma.user.upsert({
     where: { email: 'admin@summitridge.demo' },
-    update: {},
+    update: { password: passwordHash, tenantId: summit.id, role: 'ADMIN' },
     create: {
       email: 'admin@summitridge.demo',
       password: passwordHash,
@@ -59,12 +202,13 @@ async function main() {
       lastName: 'Summit',
       role: 'ADMIN',
       phone: '+17205550100',
+      tenantId: summit.id,
     },
   });
 
   const manager = await prisma.user.upsert({
     where: { email: 'manager@summitridge.demo' },
-    update: {},
+    update: { password: passwordHash, tenantId: summit.id, role: 'MANAGER' },
     create: {
       email: 'manager@summitridge.demo',
       password: passwordHash,
@@ -72,15 +216,15 @@ async function main() {
       lastName: 'Ridge',
       role: 'MANAGER',
       phone: '+17205550101',
+      tenantId: summit.id,
     },
   });
 
-  // 20 agents
   const agents: { id: string }[] = [];
   for (let i = 1; i <= 20; i++) {
     const agent = await prisma.user.upsert({
       where: { email: `agent${i}@summitridge.demo` },
-      update: {},
+      update: { password: passwordHash, tenantId: summit.id, role: 'AGENT' },
       create: {
         email: `agent${i}@summitridge.demo`,
         password: passwordHash,
@@ -88,24 +232,54 @@ async function main() {
         lastName: pick(LAST_NAMES),
         role: 'AGENT',
         phone: randomPhone(),
+        tenantId: summit.id,
       },
     });
     agents.push(agent);
   }
 
-  console.log(`Created ${agents.length + 2} users`);
+  for (const u of [admin, manager, ...agents]) {
+    const role = u.id === admin.id ? 'ADMIN' : u.id === manager.id ? 'MANAGER' : 'AGENT';
+    await prisma.tenantMembership.upsert({
+      where: { tenantId_userId: { tenantId: summit.id, userId: u.id } },
+      update: { role },
+      create: { tenantId: summit.id, userId: u.id, role },
+    });
+  }
 
-  // Properties
+  // Coastal SME owner (SSO-required — password stored for local bypass demos only)
+  const coastalAdmin = await prisma.user.upsert({
+    where: { email: 'admin@coastalhomes.demo' },
+    update: { password: passwordHash, tenantId: coastal.id, role: 'ADMIN' },
+    create: {
+      email: 'admin@coastalhomes.demo',
+      password: passwordHash,
+      firstName: 'Elena',
+      lastName: 'Küste',
+      role: 'ADMIN',
+      tenantId: coastal.id,
+    },
+  });
+  await prisma.tenantMembership.upsert({
+    where: { tenantId_userId: { tenantId: coastal.id, userId: coastalAdmin.id } },
+    update: { role: 'ADMIN' },
+    create: { tenantId: coastal.id, userId: coastalAdmin.id, role: 'ADMIN' },
+  });
+
+  console.log(`Created Summit Ridge users + Coastal Homes owner`);
+
   const properties: { id: string }[] = [];
   for (let i = 0; i < 25; i++) {
     const loc = pick(CITIES);
     const type = pick(PROPERTY_TYPES);
-    const price = type === 'commercial'
-      ? 800000 + Math.floor(Math.random() * 3000000)
-      : 350000 + Math.floor(Math.random() * 1500000);
+    const price =
+      type === 'commercial'
+        ? 800000 + Math.floor(Math.random() * 3000000)
+        : 350000 + Math.floor(Math.random() * 1500000);
 
     const property = await prisma.property.create({
       data: {
+        tenantId: summit.id,
         title: `${loc.city} ${type.charAt(0).toUpperCase() + type.slice(1)} Listing #${i + 1}`,
         description: `Beautiful ${type} property in ${loc.city}, ${loc.state}. Listed by ${COMPANY}.`,
         propertyType: type,
@@ -125,13 +299,10 @@ async function main() {
     properties.push(property);
   }
 
-  console.log(`Created ${properties.length} properties`);
-
-  // Voice rules
-  await prisma.voiceRule.deleteMany();
   const voiceRules = await Promise.all([
     prisma.voiceRule.create({
       data: {
+        tenantId: summit.id,
         name: 'High-Score Lead Outreach',
         enabled: true,
         minQualificationScore: 75,
@@ -147,6 +318,7 @@ async function main() {
     }),
     prisma.voiceRule.create({
       data: {
+        tenantId: summit.id,
         name: 'Warm Lead Follow-up',
         enabled: true,
         minQualificationScore: 60,
@@ -162,9 +334,8 @@ async function main() {
     }),
   ]);
 
-  console.log(`Created ${voiceRules.length} voice rules`);
+  console.log(`Created ${properties.length} properties, ${voiceRules.length} voice rules`);
 
-  // 100 leads
   const statuses = ['NEW', 'QUALIFIED', 'ENGAGED', 'FOLLOW_UP', 'NEGOTIATION', 'CLOSED_WON', 'CLOSED_LOST'] as const;
   const leads: { id: string; phone: string | null; firstName: string; score: number }[] = [];
 
@@ -179,6 +350,7 @@ async function main() {
 
     const lead = await prisma.lead.create({
       data: {
+        tenantId: summit.id,
         firstName,
         lastName,
         email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@example.demo`,
@@ -207,9 +379,6 @@ async function main() {
     leads.push({ id: lead.id, phone: lead.phone, firstName, score });
   }
 
-  console.log(`Created ${leads.length} leads`);
-
-  // Communication history + score history
   let commCount = 0;
   for (const lead of leads.slice(0, 60)) {
     const numComms = 1 + Math.floor(Math.random() * 4);
@@ -220,6 +389,7 @@ async function main() {
 
       const comm = await prisma.communication.create({
         data: {
+          tenantId: summit.id,
           leadId: lead.id,
           channel,
           direction: 'OUTBOUND',
@@ -236,6 +406,7 @@ async function main() {
       if (isVoice) {
         await prisma.callRecord.create({
           data: {
+            tenantId: summit.id,
             communicationId: comm.id,
             externalCallId: `seed-call-${comm.id}`,
             duration: status === 'COMPLETED' ? 60 + Math.floor(Math.random() * 180) : 0,
@@ -253,6 +424,7 @@ async function main() {
 
     await prisma.leadScoreHistory.create({
       data: {
+        tenantId: summit.id,
         leadId: lead.id,
         score: lead.score,
         factors: { budget: 7, timeline: 6, motivation: 7, authority: 6, need: 7 },
@@ -261,15 +433,15 @@ async function main() {
     });
   }
 
-  // SMS fallbacks for some failed calls
   const failedVoice = await prisma.communication.findMany({
-    where: { channel: 'VOICE', status: { in: ['NO_ANSWER', 'FAILED'] } },
+    where: { tenantId: summit.id, channel: 'VOICE', status: { in: ['NO_ANSWER', 'FAILED'] } },
     take: 15,
   });
 
   for (const parent of failedVoice) {
     await prisma.communication.create({
       data: {
+        tenantId: summit.id,
         leadId: parent.leadId,
         channel: 'SMS',
         direction: 'OUTBOUND',
@@ -282,10 +454,10 @@ async function main() {
     commCount++;
   }
 
-  // Scheduled follow-ups
   for (const lead of leads.slice(0, 40)) {
     await prisma.scheduledFollowUp.create({
       data: {
+        tenantId: summit.id,
         leadId: lead.id,
         scheduledAt: new Date(Date.now() + Math.random() * 21 * 24 * 60 * 60 * 1000),
         type: pick(['reminder', 'voice_retry', 'viewing', 'check_in'] as const),
@@ -296,13 +468,15 @@ async function main() {
     });
   }
 
-  console.log(`Created ${commCount} communications and follow-ups`);
+  console.log(`Created ${leads.length} leads, ${commCount} communications`);
   console.log('\n✅ Seed complete!');
-  console.log('\nDemo credentials:');
+  console.log('\nTenant: summit-ridge.estatecraft.io (Starter / US) — password login');
   console.log('  Admin:   admin@summitridge.demo / password');
   console.log('  Manager: manager@summitridge.demo / password');
   console.log('  Agent:   agent1@summitridge.demo / password');
-  console.log(`\nCompany: ${COMPANY} (fictional)`);
+  console.log('\nTenant: coastal-homes.estatecraft.io (Pro / EU) — SSO required');
+  console.log('  Admin:   admin@coastalhomes.demo (use SSO; or TENANT_SSO_PASSWORD_BYPASS=true locally)');
+  console.log('\nLogin body must include: { "tenantSlug": "summit-ridge", "email": "...", "password": "..." }');
 }
 
 main()

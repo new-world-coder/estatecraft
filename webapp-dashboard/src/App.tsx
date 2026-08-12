@@ -78,7 +78,11 @@ function App() {
   const [tab, setTab] = useState<Tab>('overview');
   const [token, setToken] = useState<string | null>(localStorage.getItem('ec_token'));
   const [user, setUser] = useState<User | null>(null);
-  const [loginForm, setLoginForm] = useState({ email: 'admin@summitridge.demo', password: 'password' });
+  const [loginForm, setLoginForm] = useState({
+    tenantSlug: 'summit-ridge',
+    email: 'admin@summitridge.demo',
+    password: 'password',
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -133,6 +137,9 @@ function App() {
 
       setToken(data.data.token);
       localStorage.setItem('ec_token', data.data.token);
+      if (data.data.tenant?.slug) {
+        localStorage.setItem('ec_tenant_slug', data.data.tenant.slug);
+      }
       setUser(data.data.user);
     } catch (err) {
       setError(
@@ -149,6 +156,7 @@ function App() {
     setToken(null);
     setUser(null);
     localStorage.removeItem('ec_token');
+    localStorage.removeItem('ec_tenant_slug');
   };
 
   const fetchHealth = async () => {
@@ -308,10 +316,17 @@ function App() {
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-8">
         <div className="max-w-md w-full bg-white rounded-xl shadow-2xl p-8">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-slate-900">Summit Ridge Realty</h1>
-            <p className="text-slate-500 text-sm mt-1">EstateCraft Communication Platform</p>
+            <h1 className="text-2xl font-bold text-slate-900">EstateCraft</h1>
+            <p className="text-slate-500 text-sm mt-1">{"{tenant}.estatecraft.io"}</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
+            <input
+              type="text"
+              value={loginForm.tenantSlug}
+              onChange={(e) => setLoginForm((f) => ({ ...f, tenantSlug: e.target.value }))}
+              className="w-full px-3 py-2 border rounded-lg"
+              placeholder="Workspace slug (e.g. summit-ridge)"
+            />
             <input
               type="email"
               value={loginForm.email}
@@ -335,7 +350,7 @@ function App() {
             </button>
           </form>
           <p className="mt-4 text-xs text-slate-500 text-center">
-            Demo: admin@summitridge.demo / password
+            Demo: summit-ridge / admin@summitridge.demo / password
           </p>
         </div>
       </div>

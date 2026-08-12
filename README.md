@@ -49,15 +49,16 @@ npm run dev:auth
 | API (includes auth) | http://localhost:3000 |
 | Auth (optional/legacy) | http://localhost:3001 |
 
-Auth is **database-backed** (Prisma `User` table). Roles: `ADMIN` / `MANAGER` see all leads; `AGENT` sees only assigned leads. Voice rule mutations require `ADMIN` or `MANAGER`.
+Auth is **database-backed** and **multi-tenant**. Workspaces live at `{slug}.estatecraft.io`. Roles: `ADMIN` / `MANAGER` see all leads in their tenant; `AGENT` sees only assigned leads. Pro/Enterprise require SSO. Each tenant brings their own Dial account.
 
 ### Demo Credentials
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@summitridge.demo | password |
-| Manager | manager@summitridge.demo | password |
-| Agent | agent1@summitridge.demo | password |
+| Tenant slug | Region / plan | Role | Email | Password |
+|-------------|---------------|------|-------|----------|
+| `summit-ridge` | US / Starter | Admin | admin@summitridge.demo | password |
+| `summit-ridge` | US / Starter | Manager | manager@summitridge.demo | password |
+| `summit-ridge` | US / Starter | Agent | agent1@summitridge.demo | password |
+| `coastal-homes` | EU / Pro (SSO) | Admin | admin@coastalhomes.demo | SSO (or `TENANT_SSO_PASSWORD_BYPASS=true`) |
 
 ## Environment Variables
 

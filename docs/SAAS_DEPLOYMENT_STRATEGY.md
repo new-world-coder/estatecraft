@@ -485,16 +485,19 @@ Record these decisions before implementation begins. Update as choices are made.
 
 | # | Decision | Options | Recommendation | Status |
 |---|----------|---------|----------------|--------|
-| D1 | Multi-tenancy model | Shared schema / schema-per-tenant / DB-per-tenant | Shared schema + `tenantId` (default); DB-per-tenant for enterprise | **Proposed** |
-| D2 | Auth provider | Custom JWT / Auth0 / Clerk / Supabase Auth | Custom JWT Phase 0–2; Clerk or Auth0 for SSO in Phase 4 | **Proposed** |
+| D1 | Multi-tenancy model | Shared schema / schema-per-tenant / DB-per-tenant | Shared schema + `tenantId` (default); DB-per-tenant for enterprise | **Decided** |
+| D2 | Auth provider | Custom JWT / Auth0 / Clerk / Supabase Auth | JWT + membership; OIDC SSO required for Pro/Enterprise at launch | **Decided** |
 | D3 | Billing provider | Stripe / Paddle / Chargebee | Stripe (industry standard, best docs) | **Proposed** |
 | D4 | Primary deployment target | Vercel / AWS ECS / K8s | Vercel for startup/SME; AWS ECS for enterprise | **Proposed** |
 | D5 | IaC tool | Terraform / Pulumi / CDK | Terraform (widest hiring pool, most examples) | **Proposed** |
-| D6 | Tenant resolution | Subdomain / path / header | Subdomain primary; custom domain for enterprise | **Proposed** |
-| D7 | Secrets per tenant | Encrypted JSON in DB / Vault / cloud KMS | Encrypted JSON in Phase 2; migrate to KMS in Phase 4 | **Proposed** |
-| D8 | Keep `svc-auth` separate? | Merge into `svc-api` / keep separate | Merge into `svc-api` (simpler for Vercel serverless) | **Proposed** |
-| D9 | Email uniqueness | Global / per-tenant | Per-tenant (`@@unique([tenantId, email])`) | **Proposed** |
+| D6 | Tenant resolution | Subdomain / path / header | `{slug}.estatecraft.io` primary; `X-Tenant-Slug` / JWT claim | **Decided** |
+| D7 | Secrets per tenant | Encrypted JSON in DB / Vault / cloud KMS | Integrations JSON now (BYO Dial); encrypt in Phase 2 | **Decided** |
+| D8 | Keep `svc-auth` separate? | Merge into `svc-api` / keep separate | Merge into `svc-api` (simpler for Vercel serverless) | **Decided** |
+| D9 | Email uniqueness | Global / per-tenant | Global email (SSO identity) + `TenantMembership` | **Decided** |
 | D10 | Message bus | RabbitMQ / SQS / Redis Streams | Defer to Phase 4; use direct calls until scale demands async | **Proposed** |
+| D11 | Plan tiers | — | Starter $79/10 seats; Pro $249/50 seats + SSO required; Enterprise custom + SSO | **Decided** |
+| D12 | Dial credentials | Shared platform / BYO | Each tenant brings their own Dial account | **Decided** |
+| D13 | Data residency | — | US + EU + UAE from day one (`DataRegion`) | **Decided** |
 
 ---
 
@@ -551,13 +554,13 @@ Phase 0 — Foundation
   [x] 0.5 Agent-scoped queries
 
 Phase 1 — Multi-Tenancy Core
-  [ ] 1.1 Tenant models + tenantId
-  [ ] 1.2 Tenant middleware
-  [ ] 1.3 Prisma extension
-  [ ] 1.4 Seed migration
-  [ ] 1.5 Provisioning API
-  [ ] 1.6 Postgres RLS
-  [ ] 1.7 Route + test updates
+  [x] 1.1 Tenant models + tenantId
+  [x] 1.2 Tenant middleware
+  [x] 1.3 Prisma extension
+  [x] 1.4 Seed migration
+  [x] 1.5 Provisioning API
+  [x] 1.6 Postgres RLS
+  [x] 1.7 Route + test updates
 
 Phase 2 — Tenant Config
   [ ] 2.1 Encrypted integrations
